@@ -79,7 +79,6 @@ const EditorPage = () => {
                 ({ clients, username, socketId }) => {
                     if (username !== location.state?.username) {
                         toast.success(`${username} joined the room.`);
-                        console.log(`${username} joined`);
                     }
                     setClients(clients);
                     socketRef.current.emit(ACTIONS.SYNC_CODE, {
@@ -139,6 +138,10 @@ const EditorPage = () => {
         return <Navigate to="/" state={{ roomId }} />;
     }
 
+    // Filter for unique usernames to display
+    const uniqueClients = Array.from(new Set(clients.map(c => c.username)))
+    .map(username => clients.find(c => c.username === username));
+
     return (
         <div className="mainWrap">
             <div className="aside">
@@ -151,13 +154,11 @@ const EditorPage = () => {
                         />
                     </div>
                     {/* Show connected status only when others are present */}
-                    {clients.length > 1 && (
+                    {uniqueClients.length > 1 && (
                         <>
                             <h3>Connected</h3>
                             <div className="clientsList">
-                                {Array.from(new Set(clients.map(c => c.username)))
-                                    .map(username => clients.find(c => c.username === username))
-                                    .map((client) => (
+                                {uniqueClients.map((client) => (
                                     <Client
                                         key={client.socketId}
                                         username={client.username}
@@ -166,7 +167,7 @@ const EditorPage = () => {
                             </div>
                         </>
                     )}
-                    {clients.length <= 1 && (
+                    {uniqueClients.length <= 1 && (
                          <div className="waitingForInfo">
                             <p>Waiting for others to join...</p>
                          </div>

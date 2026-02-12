@@ -89,8 +89,19 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
             });
 
             socket.on(ACTIONS.CURSOR_CHANGE, ({ socketId, cursor, username }) => {
-                if (!editorRef.current || !monacoRef.current) return;
+                if (!editorRef.current || !monacoRef.current || !cursor || !cursor.lineNumber || !cursor.column) return;
                 
+                // Validate cursor bounds
+                const model = editorRef.current.getModel();
+                if (!model) return;
+                
+                const maxLine = model.getLineCount();
+                const maxCol = model.getLineMaxColumn(Math.min(maxLine, Math.max(1, cursor.lineNumber)));
+
+                // Clamp cursor to valid range to prevent "Illegal argument"
+                const safeLine = Math.min(Math.max(1, cursor.lineNumber), maxLine);
+                const safeCol = Math.min(Math.max(1, cursor.column), maxCol);
+
                 // Assign color if not exists
                 if (!userColors.current[socketId]) {
                     userColors.current[socketId] = getRandomColor();
@@ -113,10 +124,10 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
                 const newDecorations = [
                     {
                         range: new monacoRef.current.Range(
-                            cursor.lineNumber, 
-                            cursor.column, 
-                            cursor.lineNumber, 
-                            cursor.column
+                            safeLine, 
+                            safeCol, 
+                            safeLine, 
+                            safeCol
                         ),
                         options: {
                             className: `cursor-${socketId}`,
@@ -124,10 +135,14 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
                     }
                 ];
 
-                cursorsRef.current[socketId] = editorRef.current.deltaDecorations(
-                    oldDecorations,
-                    newDecorations
-                );
+                try {
+                   cursorsRef.current[socketId] = editorRef.current.deltaDecorations(
+                       oldDecorations,
+                       newDecorations
+                   );
+                } catch(e) {
+                   console.error("Failed to render cursor:", e);
+                }
             });
 
             // Handle user leaving to clean up cursors
