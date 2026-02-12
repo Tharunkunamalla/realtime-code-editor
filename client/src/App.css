@@ -16,6 +16,11 @@ body {
     height: 100vh;
 }
 
+.homePageLogo {
+    height: 80px;
+    margin-bottom: 20px;
+}
+
 .formWrapper {
     background: #282a36;
     padding: 20px;
@@ -246,6 +251,22 @@ footer a:hover {
 }
 
 .outputBox.error {
-    border-color: #ff5555;
     color: #ff5555;
+}
+
+.langSelect {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background: #282a36;
+    color: #fff;
+    border: 1px solid #424242;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.languageSelector {
+    margin-bottom: 10px;
 }

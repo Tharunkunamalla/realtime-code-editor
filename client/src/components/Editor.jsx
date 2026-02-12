@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Editor as MonacoEditor } from '@monaco-editor/react'; // Alias to avoid conflict if any, though not needed here
 import ACTIONS from '../Actions';
 
-const Editor = ({ socketRef, roomId, onCodeChange }) => {
+const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
     const editorRef = useRef(null);
 
     function handleEditorDidMount(editor, monaco) {
@@ -41,7 +41,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
         <div style={{ height: '100%' }}>
             <MonacoEditor
                 height="100%"
-                defaultLanguage="javascript"
+                language={language || 'javascript'}
                 defaultValue="// Write your code here"
                 theme="vs-dark"
                 onMount={handleEditorDidMount}

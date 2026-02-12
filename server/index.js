@@ -55,9 +55,10 @@ io.on('connection', (socket) => {
                 let room = await Room.findOne({ roomId });
                 if (room) {
                     io.to(roomId).emit(ACTIONS.CODE_CHANGE, { code: room.code });
+                    io.to(roomId).emit(ACTIONS.LANGUAGE_CHANGE, { language: room.language });
                 } else {
                     // Create new room in DB if not exists
-                    await Room.create({ roomId, code: '' });
+                    await Room.create({ roomId, code: '', language: 'javascript' });
                 }
             } catch (err) {
                 console.error("Error loading room from DB:", err);
@@ -83,8 +84,18 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
+    socket.on(ACTIONS.LANGUAGE_CHANGE, async ({ roomId, language }) => {
+        io.to(roomId).emit(ACTIONS.LANGUAGE_CHANGE, { language });
+        try {
+            await Room.findOneAndUpdate({ roomId }, { language }, { upsert: true });
+        } catch (err) {
+            console.error("Error saving language to DB:", err);
+        }
+    });
+
+    socket.on(ACTIONS.SYNC_CODE, ({ socketId, code, language }) => { // Sync language too
         io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
+        if(language) io.to(socketId).emit(ACTIONS.LANGUAGE_CHANGE, { language });
     });
 
     socket.on('disconnecting', () => {

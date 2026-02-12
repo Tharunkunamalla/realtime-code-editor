@@ -37,6 +37,24 @@ const EditorPage = () => {
     // But we need the language too. For now hardcode or add selector.
     const [language, setLanguage] = useState('javascript');
 
+    const LANGUAGES = [
+        "javascript",
+        "typescript",
+        "python",
+        "java",
+        "csharp",
+        "php",
+    ];
+
+    const onLanguageChange = (e) => {
+        const lang = e.target.value;
+        setLanguage(lang);
+        socketRef.current.emit(ACTIONS.LANGUAGE_CHANGE, {
+            roomId,
+            language: lang,
+        });
+    };
+
     useEffect(() => {
         const init = async () => {
             socketRef.current = await initSocket();
@@ -66,9 +84,22 @@ const EditorPage = () => {
                     socketRef.current.emit(ACTIONS.SYNC_CODE, {
                         code: codeRef.current,
                         socketId,
+                        language, // Should sync current language too? Or rely on server state? 
+                        // Server state is better but if new user joins, we might want to sync our state if we are host?
+                        // Actually server sends language on JOIN if it exists in DB/memory.
+                        // But if we just changed it and someone joins?
+                        // Server broadcast LANGUAGE_CHANGE.
+                        // Better to rely on server persistence.
+                        // However, for immediate sync to new joiner:
+                        // The server logic I added emits LANGUAGE_CHANGE to the room on JOIN if it exists in DB.
                     });
                 }
             );
+
+            // Listening for language change
+            socketRef.current.on(ACTIONS.LANGUAGE_CHANGE, ({ language }) => {
+                setLanguage(language);
+            });
 
             // Listening for disconnected
             socketRef.current.on(
@@ -89,6 +120,7 @@ const EditorPage = () => {
                 socketRef.current.disconnect();
                 socketRef.current.off(ACTIONS.JOINED);
                 socketRef.current.off(ACTIONS.DISCONNECTED);
+                socketRef.current.off(ACTIONS.LANGUAGE_CHANGE);
             }
         };
     }, []);
@@ -132,6 +164,19 @@ const EditorPage = () => {
                         ))}
                     </div>
                 </div>
+                <div className="languageSelector">
+                    <select 
+                        className="langSelect" 
+                        onChange={onLanguageChange} 
+                        value={language}
+                    >
+                        {LANGUAGES.map((lang) => (
+                            <option key={lang} value={lang}>
+                                {lang.toUpperCase()}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <button className="btn copyBtn" onClick={copyRoomId}>
                     Copy ROOM ID
                 </button>
@@ -150,6 +195,7 @@ const EditorPage = () => {
                             code,
                         });
                     }}
+                    language={language}
                 />
                 <Output 
                     editorRef={{ current: { getValue: () => codeRef.current } }} // Mocking editor ref for Output
