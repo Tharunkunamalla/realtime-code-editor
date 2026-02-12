@@ -155,7 +155,9 @@ const EditorPage = () => {
                         <>
                             <h3>Connected</h3>
                             <div className="clientsList">
-                                {clients.map((client) => (
+                                {Array.from(new Set(clients.map(c => c.username)))
+                                    .map(username => clients.find(c => c.username === username))
+                                    .map((client) => (
                                     <Client
                                         key={client.socketId}
                                         username={client.username}

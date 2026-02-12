@@ -37,11 +37,31 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
     }
 
     // Helper to generate dynamic CSS for user cursor
-    const getCursorStyle = (socketId, color) => {
+    const getCursorStyle = (socketId, color, username) => {
         return `
             .cursor-${socketId} {
                 border-left: 2px solid ${color};
-                margin-left: -1px; 
+                border-right: 4px solid transparent; 
+                margin-left: -1px;
+            }
+            .cursor-${socketId}::after {
+                content: "${username || 'Guest'}";
+                position: absolute;
+                top: -18px; 
+                left: 0;
+                background: ${color};
+                color: #fff;
+                padding: 2px 4px;
+                border-radius: 3px;
+                font-size: 10px;
+                opacity: 0; 
+                transition: opacity 0.2s;
+                pointer-events: none;
+                white-space: nowrap;
+                z-index: 10;
+            }
+            .cursor-${socketId}:hover::after {
+                opacity: 1;
             }
         `;
     };
@@ -78,7 +98,8 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
                     if (styleElementRef.current) {
                         styleElementRef.current.innerHTML += getCursorStyle(
                             socketId, 
-                            userColors.current[socketId]
+                            userColors.current[socketId],
+                            username
                         );
                     }
                 }
@@ -99,7 +120,6 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
                         ),
                         options: {
                             className: `cursor-${socketId}`,
-                            hoverMessage: { value: username } 
                         }
                     }
                 ];
