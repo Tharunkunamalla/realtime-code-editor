@@ -27,10 +27,12 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
 
         editor.onDidChangeCursorPosition((e) => {
             const position = e.position; // { lineNumber: 1, column: 1 }
-            socketRef.current.emit(ACTIONS.CURSOR_CHANGE, {
-                roomId,
-                cursor: position
-            });
+            if (socketRef.current) {
+                socketRef.current.emit(ACTIONS.CURSOR_CHANGE, {
+                    roomId,
+                    cursor: position
+                });
+            }
         });
     }
 
