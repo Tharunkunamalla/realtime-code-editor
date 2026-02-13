@@ -43,6 +43,10 @@ const EditorPage = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
+    const closeMobileMenu = () => {
+        setIsMobileMenuOpen(false);
+    };
+
 
     const LANGUAGES = [
         "javascript",
@@ -155,6 +159,9 @@ const EditorPage = () => {
                     &#9776;
                 </button>
                 <div className={`asideInner ${isMobileMenuOpen ? 'show' : ''}`}>
+                    <button className="closeMenuBtn" onClick={closeMobileMenu}>
+                        &times;
+                    </button>
                     <div className="logo">
                         <img
                             className="logoImage"
