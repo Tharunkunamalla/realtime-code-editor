@@ -323,14 +323,14 @@ footer a:hover {
         flex-direction: row;
         width: 100%;
         height: auto;
-        min-height: 60px;
+        min-height: 50px;
         border-right: none;
         border-bottom: 1px solid #424242;
         padding: 5px 10px;
         align-items: center;
-        justify-content: space-between; /* Space between Info and Controls */
-        gap: 10px;
-        overflow-x: hidden; /* Prevent body scroll, handle inner scroll if needed but better to fit */
+        justify-content: space-between;
+        gap: 5px;
+        overflow-x: auto; /* Restored scroll to prevent clipping */
         background: #1c1e29;
         flex-shrink: 0;
     }
@@ -361,7 +361,7 @@ footer a:hover {
     }
     
     .logoImage {
-        height: 30px; /* Slightly smaller */
+        height: 25px;
     }
     
     .clientsList {
@@ -387,10 +387,10 @@ footer a:hover {
     .langSelect {
         margin-top: 0;
         margin-bottom: 0;
-        padding: 5px 5px; /* Tighter padding */
+        padding: 5px 5px;
         height: 30px;
-        font-size: 13px;
-        /* Keep glass styles from above */
+        font-size: 12px;
+        /* Inheriting desktop gradient and styles */
     }
     
     .copyBtn, .leaveBtn {
