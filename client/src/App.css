@@ -14,6 +14,7 @@ body {
     justify-content: center;
     color: #fff;
     height: 100vh;
+    background: radial-gradient(circle at center, #18181b 0%, #09090b 100%);
 }
 
 .homePageLogo {
@@ -22,13 +23,15 @@ body {
 }
 
 .formWrapper {
-    background: #282a36;
-    padding: 20px;
-    border-radius: 10px;
+    background: #18181b; /* Dark card background */
+    padding: 30px;
+    border-radius: 20px;
     width: 400px;
     max-width: 90%;
-    /* border: 1px solid #424242;*/
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+    border: 1px solid #27272a; /* Subtle border */
+    box-shadow: 
+        0 10px 30px -10px rgba(0, 0, 0, 0.5), /* Drop shadow */
+        0 0 0 1px rgba(255, 255, 255, 0.05); /* Inner ring */
 }
 
 footer {
@@ -40,6 +43,7 @@ footer a {
     color: #4aed88;
     text-decoration: none;
     border-bottom: 1px solid #4aed88;
+    transition: all 0.3s ease;
 }
 
 footer a:hover {
@@ -55,24 +59,36 @@ footer a:hover {
 .mainLabel {
     margin-bottom: 20px;
     margin-top: 0;
+    font-weight: 700;
+    color: #fff;
 }
 
 .inputBox {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 12px 15px;
+    border-radius: 8px;
     outline: none;
-    border: none;
+    border: 1px solid #27272a;
     margin-bottom: 14px;
-    background: #eee;
+    background: #27272a; /* Dark input bg */
     font-size: 16px;
-    font-weight: bold;
-    color: #333;
+    font-weight: 600;
+    color: #eee;
+    transition: all 0.3s ease;
+}
+
+.inputBox::placeholder {
+    color: #71717a;
+}
+
+.inputBox:focus {
+    border-color: #4aed88;
+    box-shadow: 0 0 0 2px rgba(74, 237, 136, 0.1);
 }
 
 .btn {
     border: none;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 10px 25px;
+    border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
     font-weight: bold;
@@ -81,17 +97,24 @@ footer a:hover {
 
 .joinBtn {
     background: #4aed88;
-    width: 100px;
+    color: #000;
+    width: auto; /* Allow auto width */
+    min-width: 100px;
     margin-left: auto;
+    box-shadow: 0 4px 14px rgba(74, 237, 136, 0.4);
 }
 
 .joinBtn:hover {
     background: #36b366;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 237, 136, 0.5);
 }
 
 .createInfo {
     margin: 0 auto;
     margin-top: 20px;
+    color: #a1a1aa;
+    font-size: 14px;
 }
 
 .createNewBtn {
@@ -99,6 +122,7 @@ footer a:hover {
     text-decoration: none;
     border-bottom: 1px solid #4aed88;
     transition: all 0.3s ease-in-out;
+    font-weight: 600;
 }
 
 .createNewBtn:hover {
