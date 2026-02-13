@@ -276,7 +276,7 @@ footer a:hover {
 .asideControls {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
 }
 
 /* Glassmorphism V2 */
@@ -346,7 +346,7 @@ footer a:hover {
         min-height: 50px;
         border-right: none;
         border-bottom: 1px solid #424242;
-        padding: 5px 20px; /* Increased side padding again */
+        padding: 5px 25px; /* Increased side padding again */
         align-items: center;
         justify-content: space-between;
         gap: 15px; /* Increased gap */
@@ -403,7 +403,7 @@ footer a:hover {
     }
     
     .closeMenuBtn {
-        display: block; /* Show on mobile */
+        display: block !important; /* Show on mobile */
         position: absolute;
         top: 10px;
         right: 10px;
@@ -434,7 +434,8 @@ footer a:hover {
     }
 
     .asideControls {
-        margin-left: auto; /* Push controls to right */
+        margin-top: 5px;
+    margin-right: 35px;
     }
 
     .copyBtn {
