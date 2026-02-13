@@ -257,7 +257,7 @@ footer a:hover {
 
 .editorWrap {
     display: grid;
-    grid-template-columns: 1fr 30%; /* Editor | Output */
+    grid-template-columns: minmax(0, 1fr) 300px; /* Editor | Output */
     background: #282a36;
     height: 100vh;
 }
