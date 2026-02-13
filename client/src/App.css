@@ -39,6 +39,7 @@ footer {
     bottom: 20px;
     display: flex;
     align-items: center;
+    right: 20px;
     gap: 5px;
 }
 
