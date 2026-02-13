@@ -113,6 +113,20 @@ footer a:hover {
     height: 100vh;
 }
 
+@media (max-width: 768px) {
+    .mainWrap {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr; /* Header/Aside(collapsed) | Editor */
+    }
+    
+    .aside {
+        display: none; /* Hiding sidebar for now to maximize editor space, or we can make it a hamburger menu later if requested. */
+        /* For now, to satisfy "make the output screen below", the editorWrap is the key */
+    }
+    
+    /* If we want to keep sidebar features, we might need a navbar. But for this specific request "make output screen below", I'll prioritize editorWrap. */
+}
+
 .aside {
     background: #1c1e29;
     padding: 16px;
@@ -193,7 +207,13 @@ footer a:hover {
 @media (max-width: 768px) {
     .editorWrap {
         grid-template-columns: 1fr;
-        grid-template-rows: 2fr 1fr;
+        grid-template-rows: 1fr 1fr; /* 50% Editor, 50% Output */
+        overflow-y: auto; /* Allow scrolling if content is tall */
+    }
+    
+    .outputParams {
+        border-left: none;
+        border-top: 1px solid #424242;
     }
 }
 
