@@ -544,7 +544,7 @@ footer h4 {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 99;
+        z-index: 1999;
         backdrop-filter: blur(2px);
     }
     
@@ -561,7 +561,7 @@ footer h4 {
         padding: 20px;
         padding-bottom: 80px; /* Extra room at bottom */
         gap: 20px;
-        z-index: 100;
+        z-index: 2000; /* Higher than languageDropdown (1000) */
         transition: none; /* Remove transition for display toggle */
         box-shadow: 2px 0 10px rgba(0,0,0,0.5);
         border-right: 1px solid #424242;
@@ -589,9 +589,15 @@ footer h4 {
         font-size: 28px;
         cursor: pointer;
         padding: 5px;
+        animation: slideOut 0.3s forwards;
     }
     .closeMenuBtn:hover {
         color: #4aed88;
+    }
+
+    @keyframes slideOut {
+        from { transform: translateX(0%); }
+        to { transform: translateX(-100%); }
     }
 
     /* Adjust items inside drawer */
