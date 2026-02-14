@@ -188,12 +188,12 @@ footer h4 {
 }
 
 .aside {
-    background: #1c1e29;
+    background: #1b1919;
     padding: 16px;
     color: #fff;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #424242;
+    border-right: 1px solid #515151;
 }
 
 .asideInner {
@@ -302,6 +302,31 @@ footer h4 {
 .runBtn:hover {
     background: #36b366;
 }
+.outputControls {
+    display: flex;
+    gap: 10px;
+}
+
+.clearBtn {
+    background: transparent;
+    border: 1px solid #ff5555;
+    color: #ff5555;
+    padding: 8px 16px;
+    font-size: 14px;
+    width: auto;
+}
+
+.clearBtn:hover {
+    background: rgba(255, 85, 85, 0.1);
+}
+
+.clearBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #555;
+    color: #777;
+}
+
 .runBtn.loading {
     opacity: 0.7;
     cursor: not-allowed;
@@ -309,7 +334,7 @@ footer h4 {
 
 .outputBox {
     flex: 1;
-    background: #282a36;
+    background: #181a21;
     border: 1px solid #333;
     border-radius: 4px;
     padding: 10px;
@@ -434,7 +459,7 @@ footer h4 {
     cursor: pointer;
     font-weight: 500;
     transition: background 0.2s ease;
-    border-bottom: 1px solid #282a36;
+    border-bottom: 1px solid #0a0a0c;
 }
 
 .dropdownItem:last-child {
@@ -478,7 +503,7 @@ footer h4 {
         height: auto;
         min-height: 50px;
         border-right: none;
-        border-bottom: 1px solid #424242;
+        border-bottom: 1px solid #141313;
         padding: 5px 25px; /* Increased side padding again */
         align-items: center;
         justify-content: space-between;
@@ -604,7 +629,7 @@ footer h4 {
 
     .outputParams {
         border-left: none;
-        border-top: 1px solid #424242;
+        border-top: 1px solid #1b1a1a;
         height: 40% !important;
         flex: none;
         width: 100%;

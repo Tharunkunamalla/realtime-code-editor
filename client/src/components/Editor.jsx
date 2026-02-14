@@ -92,47 +92,50 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
                 try {
                     if (!editorRef.current) return;
                     const currentCode = editorRef.current.getValue();
-                if (code !== currentCode) {
-                    editorRef.current.setValue(code);
                     
-                    // If we have the sender's new cursor, update it immediately to prevent jumping
-                    if (senderSocketId && senderCursor) {
-                        lastCursorPositionRef.current[senderSocketId] = { 
-                            cursor: senderCursor, 
-                            username: senderUsername 
-                        };
-                    }
-
-                    // Re-apply cursors
-                    Object.entries(lastCursorPositionRef.current).forEach(([socketId, { cursor, username }]) => {
-                         if (!userColors.current[socketId]) return;
-                         
-                         const model = editorRef.current.getModel();
-                         if (!model) return;
-                         
-                         const maxLine = model.getLineCount();
-                         // Validate and Clamp
-                         let safeLine = Math.min(Math.max(1, cursor.lineNumber), maxLine);
-                         let safeCol = Math.min(Math.max(1, cursor.column), model.getLineMaxColumn(safeLine));
+                    if (code !== null && code !== undefined && code !== currentCode) {
+                        editorRef.current.setValue(code);
                         
-                         // Decide label position
-                         const labelClass = safeLine === 1 ? 'cursor-label-down' : 'cursor-label-up';
+                        // If we have the sender's new cursor, update it immediately to prevent jumping
+                        if (senderSocketId && senderCursor) {
+                            lastCursorPositionRef.current[senderSocketId] = { 
+                                cursor: senderCursor, 
+                                username: senderUsername 
+                            };
+                        }
 
-                         const newDecorations = [{
-                             range: new monacoRef.current.Range(safeLine, safeCol, safeLine, safeCol),
-                             options: { className: `cursor-${socketId} ${labelClass}` }
-                         }];
-                         
-                         try {
-                             cursorsRef.current[socketId] = editorRef.current.deltaDecorations(
-                                 cursorsRef.current[socketId] || [],
-                                 newDecorations
-                             );
-                         } catch (e) {
-                             console.error("Re-apply cursor failed", e);
-                         }
-                    });
-                }
+                        // Re-apply cursors
+                        Object.entries(lastCursorPositionRef.current).forEach(([socketId, { cursor, username }]) => {
+                             if (!userColors.current[socketId]) return;
+                             
+                             const model = editorRef.current.getModel();
+                             if (!model) return;
+                             
+                             const maxLine = model.getLineCount();
+                             // Validate and Clamp
+                             if (!cursor || typeof cursor.lineNumber !== 'number' || typeof cursor.column !== 'number') return;
+
+                             let safeLine = Math.min(Math.max(1, cursor.lineNumber), maxLine);
+                             let safeCol = Math.min(Math.max(1, cursor.column), model.getLineMaxColumn(safeLine));
+                            
+                             // Decide label position
+                             const labelClass = safeLine === 1 ? 'cursor-label-down' : 'cursor-label-up';
+
+                             const newDecorations = [{
+                                 range: new monacoRef.current.Range(safeLine, safeCol, safeLine, safeCol),
+                                 options: { className: `cursor-${socketId} ${labelClass}` }
+                             }];
+                             
+                             try {
+                                 cursorsRef.current[socketId] = editorRef.current.deltaDecorations(
+                                     cursorsRef.current[socketId] || [],
+                                     newDecorations
+                                 );
+                             } catch (e) {
+                                 console.error("Re-apply cursor failed", e);
+                             }
+                        });
+                    }
                 } catch (e) {
                     console.error("CODE_CHANGE error:", e);
                 }

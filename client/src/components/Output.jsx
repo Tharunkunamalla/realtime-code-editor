@@ -22,17 +22,31 @@ const Output = ({ editorRef, language }) => {
     }
   };
 
+  const clearOutput = () => {
+    setOutput(null);
+    setIsError(false);
+  };
+
   return (
     <div className="outputParams">
       <div className="outputHeader">
         <h3 className="outputTitle">Output</h3>
-        <button 
-            className={`btn runBtn ${isLoading ? 'loading' : ''}`} 
-            disabled={isLoading} 
-            onClick={runCode}
-        >
-          {isLoading ? 'Running...' : 'Run Code'}
-        </button>
+        <div className="outputControls">
+            <button 
+                className="btn clearBtn" 
+                onClick={clearOutput}
+                disabled={!output}
+            >
+            Clear
+            </button>
+            <button 
+                className={`btn runBtn ${isLoading ? 'loading' : ''}`} 
+                disabled={isLoading} 
+                onClick={runCode}
+            >
+            {isLoading ? 'Running...' : 'Run Code'}
+            </button>
+        </div>
       </div>
       <div 
         className={`outputBox ${isError ? 'error' : ''}`}
