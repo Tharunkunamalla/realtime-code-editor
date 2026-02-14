@@ -8,6 +8,7 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
     const cursorsRef = useRef({}); // Stores decoration IDs per socketId
     const lastCursorPositionRef = useRef({}); // Store cursor position data
     const styleElementRef = useRef(null);
+    const isRemoteUpdate = useRef(false);
 
     function handleEditorDidMount(editor, monaco) {
         editorRef.current = editor;
@@ -22,6 +23,7 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
         }
         
         editor.onDidChangeModelContent((event) => {
+             if (isRemoteUpdate.current) return;
              const code = editor.getValue();
              const cursor = editor.getPosition();
              onCodeChange(code, cursor);
@@ -94,7 +96,9 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
                     const currentCode = editorRef.current.getValue();
                     
                     if (code !== null && code !== undefined && code !== currentCode) {
+                        isRemoteUpdate.current = true;
                         editorRef.current.setValue(code);
+                        isRemoteUpdate.current = false;
                         
                         // If we have the sender's new cursor, update it immediately to prevent jumping
                         if (senderSocketId && senderCursor) {
