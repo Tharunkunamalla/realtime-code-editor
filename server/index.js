@@ -15,7 +15,9 @@ const io = new Server(server, {
     cors: {
         origin: "*", // Allow all origins for dev to avoid CORS issues if port changes
         methods: ["GET", "POST"]
-    }
+    },
+    pingTimeout: 60000,
+    transports: ['websocket', 'polling']
 });
 
 app.use(express.json());
