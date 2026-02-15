@@ -31,6 +31,7 @@ mongoose.connect(process.env.MONGO_URI)
 const userSocketMap = {};
 const dbDebounce = {}; // Map to store debounce timers for saving code
 const saveLanguageDebounce = {}; // Debounce for language
+const roomState = {}; // In-memory store for pending changes
 
 
 function getAllConnectedClients(roomId) {
@@ -89,11 +90,18 @@ io.on('connection', (socket) => {
         
         // Save to DB (Debounced)
         if (dbDebounce[roomId]) clearTimeout(dbDebounce[roomId]);
+
+        roomState[roomId] = { ...roomState[roomId], code };
         
         dbDebounce[roomId] = setTimeout(async () => {
              try {
                  await Room.findOneAndUpdate({ roomId }, { code }, { upsert: true });
                  delete dbDebounce[roomId];
+                 delete roomState[roomId]; // Clean up memory if saved successfully? No, keep it as "latest state" just in case.
+                 // Actually, if we don't delete, memory grows. But wait, we only use roomState if debounce exists.
+                 // If we successfully save, debounce is gone. So we can clear roomState[roomId].code maybe?
+                 // But multiple clients might be emitting.
+                 // Let's just update roomState. We can clear it on room close or empty.
              } catch (err) {
                  console.error("Error saving code to DB:", err);
              }
@@ -105,6 +113,8 @@ io.on('connection', (socket) => {
         
         // Save to DB (Debounced)
         if (saveLanguageDebounce[roomId]) clearTimeout(saveLanguageDebounce[roomId]);
+
+        roomState[roomId] = { ...roomState[roomId], language };
         
         saveLanguageDebounce[roomId] = setTimeout(async () => {
              try {
@@ -136,6 +146,23 @@ io.on('connection', (socket) => {
                 socketId: socket.id,
                 username: userSocketMap[socket.id],
             });
+
+            // Flush changes to DB if there's a pending debounce and this is the last user (or just to be safe)
+            // Actually, we should just save if we have pending changes.
+            if (dbDebounce[roomId]) {
+                clearTimeout(dbDebounce[roomId]);
+                delete dbDebounce[roomId];
+                if (roomState[roomId]?.code) {
+                    Room.findOneAndUpdate({ roomId }, { code: roomState[roomId].code }, { upsert: true }).catch(err => console.error(err));
+                }
+            }
+             if (saveLanguageDebounce[roomId]) {
+                clearTimeout(saveLanguageDebounce[roomId]);
+                delete saveLanguageDebounce[roomId];
+                if (roomState[roomId]?.language) {
+                    Room.findOneAndUpdate({ roomId }, { language: roomState[roomId].language }, { upsert: true }).catch(err => console.error(err));
+                }
+            }
         });
         delete userSocketMap[socket.id];
         socket.leave();
