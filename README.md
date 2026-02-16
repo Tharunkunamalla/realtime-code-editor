@@ -115,8 +115,14 @@ real-time-code-editor/
 Run the entire stack (Client, Server, MongoDB) with a single command.
 
 1.  **Start the application:**
+    -   **Build the images and start the containers:**
     ```bash
     docker-compose up --build
+    ```
+    OR
+    -   **Start the containers:**
+    ```bash
+    docker-compose up 
     ```
 
 2.  **Access the app:**
