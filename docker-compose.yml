@@ -13,12 +13,28 @@ services:
     restart: always
 
   client:
-    build: ./client
+    build: 
+      context: ./client
+      args:
+        - VITE_PISTON_URL=/piston/api/v2/execute
     container_name: codesync-client
     ports:
       - "5173:80"
     depends_on:
       - server
+      - piston
+    restart: always
+
+  piston:
+    image: ghcr.io/engineer-man/piston:latest
+    container_name: codesync-piston
+    privileged: true
+    ports:
+      - "2000:2000"
+    volumes:
+      - piston-data:/piston
+    tmpfs:
+      - /tmp:exec,mode=777
     restart: always
 
   mongo:
@@ -32,3 +48,4 @@ services:
 
 volumes:
   mongo-data:
+  piston-data:

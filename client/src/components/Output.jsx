@@ -11,11 +11,17 @@ const Output = ({ editorRef, language }) => {
     if (!sourceCode) return;
     try {
       setIsLoading(true);
-      const { run: result } = await executeCode(language || 'javascript', sourceCode);
-      setOutput(result.output.split('\n'));
-      result.stderr ? setIsError(true) : setIsError(false);
+      const response = await executeCode(language || 'javascript', sourceCode);
+      
+      if (response && response.run) {
+        const result = response.run;
+        setOutput(result.output.split('\n'));
+        result.stderr ? setIsError(true) : setIsError(false);
+      } else {
+        throw new Error(response.message || "Unexpected response from execution service");
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Execution Error:", error);
       toast.error(error.message || "Unable to run code");
     } finally {
       setIsLoading(false);
@@ -71,11 +77,20 @@ export const executeCode = async (language, sourceCode) => {
         php: "8.2.3", 
     };
 
-    const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+    const PISTON_URL = (window._env_ && window._env_.VITE_PISTON_URL) || import.meta.env.VITE_PISTON_URL || "/piston/api/v2/execute";
+    const PISTON_API_KEY = (window._env_ && window._env_.VITE_PISTON_API_KEY) || import.meta.env.VITE_PISTON_API_KEY;
+
+    const headers = {
+        "Content-Type": "application/json", 
+    };
+
+    if (PISTON_API_KEY) {
+        headers["Authorization"] = PISTON_API_KEY;
+    }
+
+    const response = await fetch(PISTON_URL, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json", 
-        },
+        headers: headers,
         body: JSON.stringify({
             language: language,
             version: LANGUAGE_VERSIONS[language] || "*", 
@@ -86,6 +101,11 @@ export const executeCode = async (language, sourceCode) => {
             ],
         }),
     });
+
+    if (response.status === 401) {
+        throw new Error("Piston API access is restricted. You need an API key or a self-hosted instance.");
+    }
+
     return await response.json();
 };
 

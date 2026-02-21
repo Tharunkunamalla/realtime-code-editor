@@ -4,6 +4,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# Build-time environment variables for Vite
+ARG VITE_PISTON_URL
+ARG VITE_PISTON_API_KEY
+ENV VITE_PISTON_URL=$VITE_PISTON_URL
+ENV VITE_PISTON_API_KEY=$VITE_PISTON_API_KEY
+
 RUN npm run build
 
 # Production stage
