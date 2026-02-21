@@ -4,6 +4,7 @@ A powerful, real-time collaborative code editor that allows multiple users to wr
 
 ## 🚀 Features
 
+
 -   **Real-Time Collaboration**: Code changes are synchronized instantly across all connected clients using Socket.io.
 -   **Multi-Language Support**: Syntax highlighting and execution support for JavaScript, Python, Java, C++, and more.
 -   **Live Cursor Tracking**: See exactly where other users are typing with color-coded cursors and name labels.
