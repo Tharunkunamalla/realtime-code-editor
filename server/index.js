@@ -177,39 +177,39 @@ const PORT = process.env.PORT || 5000;
 
 // Proxy Execution Route to bypass CORS
 app.post('/api/execute', async (req, res) => {
-    const { language, version, files } = req.body;
-    
+    const { language, files } = req.body;
+    const code = files[0].content;
+
     try {
-        // We will try our own Piston first if URL is set, otherwise use a public reliable fallback
-        const PISTON_URL = process.env.PISTON_URL || 'https://emkc.org/api/v2/piston/execute';
-        
-        const response = await axios.post(PISTON_URL, {
-            language,
-            version,
-            files
+        // Use a high-uptime public Judge0 instance
+        const response = await axios.post('https://judge0-ce.p.sulu.sh/submissions?wait=true', {
+            source_code: code,
+            language_id: getJudge0LanguageId(language),
+            stdin: ""
         });
-        res.json(response.data);
+
+        res.json({
+            run: {
+                output: response.data.stdout || response.data.stderr || response.data.compile_output || "No output",
+                stderr: response.data.stderr || ""
+            }
+        });
     } catch (error) {
-        // If Piston 401s or fails, we fallback to a secondary reliable free API
-        console.warn("Piston failed, trying fallback...");
-        try {
-            const fallbackResponse = await axios.post('https://api.codex.jaagrav.in', {
-                language: language === 'javascript' ? 'js' : language, // Normalize language codes
-                code: files[0].content
-            });
-            
-            // Map the different API response format back to what your frontend expects
-            return res.json({
-                run: {
-                    output: fallbackResponse.data.output || fallbackResponse.data.error,
-                    stderr: fallbackResponse.data.error ? fallbackResponse.data.error : ""
-                }
-            });
-        } catch (fallbackError) {
-             console.error("All execution engines failed:", fallbackError.message);
-             res.status(500).json({ message: "Code execution service currently unavailable" });
-        }
+        console.error("Execution Engine Failed:", error.message);
+        res.status(500).json({ message: "Code execution service currently unavailable" });
     }
 });
+
+// Helper to map monikers to Judge0 IDs
+function getJudge0LanguageId(lang) {
+    const map = {
+        'javascript': 63,
+        'python': 71,
+        'java': 62,
+        'cpp': 54,
+        'csharp': 51
+    };
+    return map[lang] || 63;
+}
 
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
