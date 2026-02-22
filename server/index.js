@@ -178,31 +178,39 @@ const PORT = process.env.PORT || 5000;
 // Proxy Execution Route to bypass CORS
 app.post('/api/execute', async (req, res) => {
     const { language, version, files } = req.body;
+    const code = files[0]?.content || "";
     
-    // We'll try 3 different endpoints to ensure one works
+    // Ordered by reliability (Python Discord mirror is very stable)
     const endpoints = [
-        'https://emkc.org/api/v2/piston/execute',
-        'https://piston.engineer-man.workers.dev/api/v2/execute', // Alternate mirror
-        'https://api.codex.jaagrav.in' // Non-Piston fallback
+        { url: 'https://piston.pydis.com/api/v2/execute', type: 'piston' },
+        { url: 'https://emkc.org/api/v2/piston/execute', type: 'piston' },
+        { url: 'https://api.codex.jaagrav.in', type: 'codex' }
     ];
 
-    for (let url of endpoints) {
+    for (let target of endpoints) {
         try {
-            console.log(`[EXEC] Trying endpoint: ${url}`);
+            console.log(`[EXEC] Attempting: ${target.url}`);
             
-            // Format payload for CodeX if we are on that URL
-            const isCodex = url.includes('codex');
-            const payload = isCodex 
-                ? { language: language === 'javascript' ? 'js' : language, code: files[0].content }
-                : { language, version: version || "*", files };
+            let payload;
+            if (target.type === 'piston') {
+                payload = { 
+                    language: language, 
+                    version: version || "*", 
+                    files: [{ name: "index", content: code }] // Filename is mandatory for some mirrors
+                };
+            } else {
+                payload = { 
+                    language: language === 'javascript' ? 'js' : language, 
+                    code: code 
+                };
+            }
 
-            const response = await axios.post(url, payload, {
-                headers: { 'User-Agent': 'Mozilla/5.0' },
-                timeout: 8000
+            const response = await axios.post(target.url, payload, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
+                timeout: 10000 
             });
 
-            // Normalize CodeX response to match Piston format
-            if (isCodex) {
+            if (target.type === 'codex') {
                 return res.json({
                     run: { output: response.data.output || response.data.error, stderr: response.data.error || "" }
                 });
@@ -210,12 +218,12 @@ app.post('/api/execute', async (req, res) => {
 
             return res.json(response.data);
         } catch (error) {
-            console.error(`[EXEC] Failed at ${url}:`, error.message);
-            continue; // Try next one
+            console.error(`[EXEC FAIL] ${target.url}:`, error.response?.data || error.message);
+            continue; 
         }
     }
 
-    res.status(500).json({ message: "All execution engines are busy. Try again in 10 seconds." });
+    res.status(500).json({ message: "System Busy. Please try again in 5 seconds." });
 });
 
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
