@@ -178,14 +178,31 @@ const PORT = process.env.PORT || 5000;
 // Proxy Execution Route to bypass CORS
 app.post('/api/execute', async (req, res) => {
     const { language, version, files } = req.body;
+    
+    // Use private Piston if provided, otherwise fallback to public
+    const PISTON_URL = process.env.PISTON_URL || 'https://emkc.org/api/v2/piston/execute';
+    
     try {
-        const response = await axios.post(process.env.PISTON_URL || 'https://emkc.org/api/v2/piston/execute', {
+        const response = await axios.post(PISTON_URL, {
             language,
             version,
             files
         });
         res.json(response.data);
     } catch (error) {
+        // If private Piston failed, try the public one as a last resort
+        if (process.env.PISTON_URL) {
+             try {
+                const retryResponse = await axios.post('https://emkc.org/api/v2/piston/execute', {
+                    language,
+                    version,
+                    files
+                });
+                return res.json(retryResponse.data);
+             } catch (retryError) {
+                console.error("Public Piston Error:", retryError.message);
+             }
+        }
         console.error("Piston Proxy Error:", error.response?.data || error.message);
         res.status(error.response?.status || 500).json(error.response?.data || { message: "Execution Failed" });
     }
