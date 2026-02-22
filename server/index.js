@@ -175,45 +175,32 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Proxy Execution Route (Keyless Multi-Engine)
+// Proxy Execution Route (Keyless Multi-Engine with Debugging)
 app.post('/api/execute', async (req, res) => {
     const { language, files } = req.body;
     const code = files[0]?.content || "";
+    let lastError = "No runner attempted";
 
     const runners = [
-        // 1. Paiza.io (Very stable, keyless)
+        // 1. Pydis (The most stable Piston mirror)
         async () => {
-             const create = await axios.post('https://api.paiza.io/v1/runners/create', {
-                 source_code: code,
-                 language: language === 'javascript' ? 'nodejs' : language,
-                 api_key: 'guest'
-             });
-             
-             // Polling for result (Paiza is async)
-             let result;
-             for(let i=0; i<5; i++) {
-                 await new Promise(r => setTimeout(r, 1000));
-                 const details = await axios.get(`https://api.paiza.io/v1/runners/get_details?id=${create.data.id}&api_key=guest`);
-                 if(details.data.status === 'completed') {
-                     result = details.data;
-                     break;
-                 }
-             }
-             return { run: { output: result.stdout || result.stderr || result.build_stderr, stderr: result.stderr || result.build_stderr || "" } };
-        },
-
-        // 2. Mirror Spoofing (Mimics Piston's own website)
-        async () => {
-            const resp = await axios.post('https://emkc.org/api/v2/piston/execute', {
-                language, version: "*", files: [{ content: code }]
-            }, {
-                headers: {
-                    'Referer': 'https://emkc.org/',
-                    'Origin': 'https://emkc.org',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-                }
+            const resp = await axios.post('https://piston.pydis.com/api/v2/execute', {
+                language, version: "*", files: [{ name: "index", content: code }]
+            }, { 
+                headers: { 'User-Agent': 'Mozilla/5.0' },
+                timeout: 10000 
             });
             return resp.data;
+        },
+        
+        // 2. Glot.io (High reliability fallback)
+        async () => {
+            const langMap = { 'javascript': 'javascript', 'python': 'python', 'java': 'java' };
+            const glotLang = langMap[language] || language;
+            const resp = await axios.post(`https://glot.io/api/run/${glotLang}/latest`, {
+                files: [{ name: "main.js", content: code }]
+            }, { timeout: 10000 });
+            return { run: { output: resp.data.stdout || resp.data.stderr, stderr: resp.data.stderr || "" } };
         }
     ];
 
@@ -222,12 +209,17 @@ app.post('/api/execute', async (req, res) => {
             const data = await runTask();
             return res.json(data);
         } catch (e) {
-            console.error("Runner failed, trying next...");
+            lastError = e.response?.data?.message || e.message;
+            console.error(`Runner failed: ${lastError}`);
             continue;
         }
     }
 
-    res.status(500).json({ message: "Execution servers are currently busy. Please try again." });
+    // Return the actual error so we can see it in the UI
+    res.status(500).json({ 
+        message: "Execution engines failed. Last error: " + lastError,
+        details: lastError
+    });
 });
 
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
